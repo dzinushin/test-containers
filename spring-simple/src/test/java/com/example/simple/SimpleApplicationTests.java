@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
 import org.springframework.boot.autoconfigure.service.connection.ConnectionDetails;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -20,33 +21,36 @@ import java.sql.SQLException;
 @SpringBootTest
 class SimpleApplicationTests {
 
-	Logger log = LoggerFactory.getLogger(SimpleApplication.class);
+    Logger log = LoggerFactory.getLogger(SimpleApplication.class);
 
-	@Autowired
-	JdbcTemplate jdbcTemplate;
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
-	@Autowired
-	JdbcClient jdbcClient;
+    @Autowired
+    JdbcClient jdbcClient;
 
-	@Autowired
-	DataSource dataSource;
+    @Autowired
+    DataSource dataSource;
 
-	@BeforeEach
-	void setUp() {
-		jdbcTemplate.execute("delete from customer");
-	}
+    @Autowired
+    JdbcConnectionDetails jdbcConnectionDetails;
 
-	@Test
-	void contextLoads() {
-	}
+    @BeforeEach
+    void setUp() {
+        jdbcTemplate.execute("delete from customer");
+    }
 
-	@Test
-	void test_get_data() {
-		jdbcTemplate.execute("insert into customer(name) values ('Josh')");
+    @Test
+    void contextLoads() {
+    }
 
-		Integer result = jdbcTemplate.queryForObject("select count(*) from customer", Integer.class);
+    @Test
+    void test_get_data() {
+        jdbcTemplate.execute("insert into customer(name) values ('Josh')");
 
-		log.info("result: {}", result);
+        Integer result = jdbcTemplate.queryForObject("select count(*) from customer", Integer.class);
+
+        log.info("result: {}", result);
 
 
 //		jdbcClient
@@ -55,12 +59,20 @@ class SimpleApplicationTests {
 //				.stream()
 //				.forEach(System.out::println);
 
-	}
+    }
 
-	@Test
-	void inspectDS() throws SQLException {
-		DatabaseMetaData databaseMetaData = dataSource.getConnection().getMetaData();
-		String url = databaseMetaData.getURL();
-		log.info("url: {}", url);
-	}
+    @Test
+    void inspectDS() throws SQLException {
+        DatabaseMetaData databaseMetaData = dataSource.getConnection().getMetaData();
+        String url = databaseMetaData.getURL();
+        log.info("url: {}", url);
+    }
+
+    @Test
+    void inspect_jdbc_conn_details() {
+        log.info("jdbcConnectionDetails: jdbcUrl {} username: {} password: {}",
+                jdbcConnectionDetails.getJdbcUrl(),
+                jdbcConnectionDetails.getUsername(),
+                jdbcConnectionDetails.getPassword());
+    }
 }
